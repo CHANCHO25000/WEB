@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Form</title>
+    <style>
+        form {
+            margin: 0 auto;
+            width: 400px;
+            padding: 1em;
+            border: 1px solid #ccc;
+            border-radius: 1em;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        form li + li {
+            margin-top: 1em;
+        }
+
+        label {
+            display: inline-block;
+            width: 90px;
+            text-align: right;
+        }
+
+        input,
+        textarea {
+            font: 1em sans-serif;
+            width: 300px;
+            box-sizing: border-box;
+            border: 1px solid #999;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #000;
+        }
+
+        textarea {
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <form action="/my-handling-form-page" method="post">
+        <ul>
+            <li>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="user_name">
+            </li>
+            <li>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="user_email">
+            </li>
+            <li>
+                <label for="message">Message:</label>
+                <textarea id="message" name="user_message"></textarea>
+            </li>
+            <li class="button">
+                <button type="submit">Submit Message</button>
+            </li>
+        </ul>
+    </form>
+</body>
+
+<?php
+$directory = 'C:/xampp/htdocs/prueba/Carpetas1';
+$file_to_search = $_POST['n_archivo'];
+
+function searchFile($directory, $file_to_search)
+{
+    $results = [];
+
+    $files = scandir($directory);
+
+    foreach ($files as $file) {
+        if ($file === '.' || $file === '..') {
+            continue;
+        }
+
+        $file_path = $directory . '/' . $file;
+
+        if (is_dir($file_path)) {
+            $sub_results = searchFile($file_path, $file_to_search);
+            $results = array_merge($results, $sub_results);
+        } else {
+            if (pathinfo($file, PATHINFO_EXTENSION) === 'html' || pathinfo($file, PATHINFO_EXTENSION) === 'js') {
+                if (strpos($file, $file_to_search) !== false) {
+                    $results[] = ['path' => $file_path, 'name' => $file];
+                }
+            }
+        }
+    }
+
+    return $results;
+}
+
+$results = searchFile($directory, $file_to_search);
+
+if (empty($results)) {
+    echo "No se encontraron archivos.";
+} else {
+    echo "<ul>";
+    foreach ($results as $result) {
+        echo "<li><a href='{$result['path']}' target='_blank'>{$result['name']}</a></li>";
+    }
+    echo "</ul>";
+}
+?>
+</html>
